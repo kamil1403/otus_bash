@@ -122,8 +122,8 @@ EMAIL="test_otus@gmail.com"
 REPORT_FILE="/tmp/log_report.txt"
 
 # Telegram
-BOT_TOKEN="8440377128:AAHI96mV9l62BGDdseZVS3-L9-v_3IVxx2U"
-CHAT_ID="580441018"
+BOT_TOKEN="скрываем в ДЗ"
+CHAT_ID="скрываем в ДЗ"
 
 # Заголовок отчёта
 {
@@ -165,7 +165,7 @@ CHAT_ID="580441018"
 # Отправка письма
 #mail -s "[$(hostname)] Hourly Log Report" "$EMAIL" < "$REPORT_FILE"
 
-# Отправляем лога в Telegram
+# Отправляем логи в Telegram
 TEXT=$(cat "$REPORT_FILE")
 curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
      -d chat_id="${CHAT_ID}" \
