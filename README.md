@@ -26,92 +26,11 @@
 
 ---
 
-<a id="unit"></a>
-## 📋 Написать service, который будет раз в 30 секунд мониторить лог на предмет наличия ключевого слова
+<a id="one"></a>
+## 🧰 Команда №1 - "Топ IP по количеству запросов
 
 ```bash
-# ----------------------------- STEP 1 -----------------------------
-# Конфиг с переменными:
-cd /etc/default/
-nano watchlog
-
-# ----------------------------- STEP 2 -----------------------------
-# Вставить и сохранить:
-# Configuration file for my watchlog service
-# Place it to /etc/default
-# File and word in that file that we will be monit
-WORD="ALERT"
-LOG=/var/log/watchlog.log
-
-# ----------------------------- STEP 3 -----------------------------
-# Лог-файл и тестовые строки (обязательно с ALERT):
-cd /var/log/
-nano watchlog.log
-
-# ----------------------------- STEP 4 -----------------------------
-# Скрипт:
-bash
-cd /opt
-nano watchlog.sh
-
-# ----------------------------- STEP 5 -----------------------------
-# Вставить и сохранить:
-#!/bin/bash
-WORD=$1
-LOG=$2
-DATE=`date`
-if grep $WORD $LOG &> /dev/null
-then
-logger "$DATE: I found word, Master!"
-else
-exit 0
-fi
-
-# ----------------------------- STEP 6 -----------------------------
-# Сделать исполняемым:
-chmod +x /opt/watchlog.sh
-
-# ----------------------------- STEP 7 -----------------------------
-# Юнит сервиса:
-cd /etc/systemd/system
-nano watchlog.service
-
-# ----------------------------- STEP 8 -----------------------------
-# ставить и сохранить:
-[Unit]
-Description=My watchlog service
-[Service]
-Type=oneshot
-EnvironmentFile=/etc/default/watchlog
-ExecStart=/opt/watchlog.sh $WORD $LOG
-
-# ----------------------------- STEP 9 -----------------------------
-# Юнит таймера:
-nano watchlog.timer
-
-# ----------------------------- STEP 10 ----------------------------
-# Вставить и сохранить:
-[Unit]
-Description=Run watchlog script every 30 second
-[Timer]
-# Run every 30 second
-OnUnitActiveSec=30
-Unit=watchlog.service
-[Install]
-WantedBy=multi-user.target
-
-# ----------------------------- STEP 11 ----------------------------
-# Запуск:
-systemctl daemon-reload
-systemctl start watchlog.service
-systemctl start watchlog.timer
-
-# ----------------------------- STEP 12 ----------------------------
-# Проверка результата:
-tail -n 1000 /var/log/syslog | grep word
-
-# ----------------------------- RESULT -----------------------------
-# Готово. Если увидим строку: "I found word, Master!" - значит сервис работает.
+awk '{print $1}' otus.log | sort | uniq -c | sort -nr
 ```
 
 ---
