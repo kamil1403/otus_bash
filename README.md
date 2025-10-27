@@ -103,7 +103,7 @@ crontab -e
 
 # ----------------------------- STEP 3 -----------------------------
 # Добавить строку:
-0 * * * * /home/ubuntuserv/loglab/log_report.sh >> /home/ubuntuserv/loglab/cron.log 2>&1
+0 * * * * /home/ubuntuserv/loglab/log_report.sh
 ```
 
 ---
