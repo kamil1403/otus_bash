@@ -36,7 +36,7 @@ awk '{print $1}' otus.log | sort | uniq -c | sort -nr
 ---
 
 <a id="two"></a>
-## ## 🧰 Команда №2 — «Топ первых сегментов URL
+## 🧰 Команда №2 — «Топ первых сегментов URL
 
 ```bash
 awk -F'"' '{print $2}' otus.log | cut -d'/' -f2 | sort | uniq -c | sort -nr | head -n 11
