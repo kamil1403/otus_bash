@@ -30,16 +30,16 @@
 ## 🧰 Команда №1 - "Топ IP по количеству запросов
 
 ```bash
-awk '{print $1}' otus.log | sort | uniq -c | sort -nr
+awk '{print $1}' "$LOG_FILE" | sort | uniq -c | sort -nr | head -n 10
 ```
 
 ---
 
 <a id="two"></a>
-## 🧰 Команда №2 — «Топ первых сегментов URL
+## 🧰 Команда №2 — «Топ запрашиваемых URL
 
 ```bash
-awk -F'"' '{print $2}' otus.log | cut -d'/' -f2 | sort | uniq -c | sort -nr | head -n 11
+awk -F'"' '{print $2}' "$LOG_FILE" | cut -d'/' -f2 | sort | uniq -c | sort -nr | head -n 10
 ```
 
 ---
@@ -48,7 +48,7 @@ awk -F'"' '{print $2}' otus.log | cut -d'/' -f2 | sort | uniq -c | sort -nr | he
 ## 🧰 Команда №3 - "Ошибки веб-сервера / приложения (4xx/5xx)
 
 ```bash
-awk '$9 ~ /^[45]/ {print $9}' otus.log | sort | uniq -c | sort -nr
+awk '$9 ~ /^[45]/ {print $9}' "$LOG_FILE" | sort | uniq -c | sort -nr
 ```
 
 ---
@@ -57,7 +57,7 @@ awk '$9 ~ /^[45]/ {print $9}' otus.log | sort | uniq -c | sort -nr
 ## 🧰 Команда №4 - "Все коды HTTP с их количеством
 
 ```bash
-awk '$9 ~ /^[12345]/ {print $9}' otus.log | sort | uniq -c | sort -nr
+awk '$9 ~ /^[12345]/ {print $9}' "$LOG_FILE" | sort | uniq -c | sort -nr
 ```
 
 ---
@@ -108,7 +108,64 @@ crontab -e
 ## 📝 Содержимое скрипта
 
 ```bash
-awk '$9 ~ /^[45]/ {print $9}' otus.log | sort | uniq -c | sort -nr
+#!/usr/bin/env bash
+
+# Настройки
+LOG_FILE="/home/ubuntuserv/loglab/otus.log"
+EMAIL="test_otus@gmail.com"
+
+# Временный файл отчёта
+REPORT_FILE="/tmp/log_report.txt"
+
+# Telegram
+BOT_TOKEN="8440377128:AAHI96mV9l62BGDdseZVS3-L9-v_3IVxx2U"
+CHAT_ID="580441018"
+
+# Заголовок отчёта
+{
+  echo "Почасовой отчет из логов"
+  echo "Дата: $(date '+%Y-%m-%d %H:%M:%S')"
+  echo "Лог-файл:  $LOG_FILE"
+  echo "----------------------------------------"
+  echo
+} > "$REPORT_FILE"
+
+# 1) Топ IP-адресов (топ-10)
+{
+  echo "Топ IP-адресов:"
+  awk '{print $1}' "$LOG_FILE" | sort | uniq -c | sort -nr | head -n 10
+  echo
+} >> "$REPORT_FILE"
+
+# 2) Топ запрашиваемых URL
+{
+  echo "Топ запрашиваемых URL:"
+  awk -F'"' '{print $2}' "$LOG_FILE" | cut -d'/' -f2 | sort | uniq -c | sort -nr | head -n 10
+  echo
+} >> "$REPORT_FILE"
+
+# 3) Ошибки веб-сервера/приложения c момента последнего запуска (4xx/5xx)
+{
+  echo "Ошибки (4xx/5xx):"
+  awk '$9 ~ /^[45]/ {print $9}' "$LOG_FILE" | sort | uniq -c | sort -nr
+  echo
+} >> "$REPORT_FILE"
+
+# 4) Список всех кодов HTTP ответа с указанием их кол-ва с момента последнего запуска скрипта
+{
+  echo "Все коды HTTP:"
+  awk '$9 ~ /^[12345]/ {print $9}' "$LOG_FILE" | sort | uniq -c | sort -nr
+  echo
+} >> "$REPORT_FILE"
+
+# Отправка письма
+#mail -s "[$(hostname)] Hourly Log Report" "$EMAIL" < "$REPORT_FILE"
+
+# Отправляем лога в Telegram
+TEXT=$(cat "$REPORT_FILE")
+curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+     -d chat_id="${CHAT_ID}" \
+     --data-urlencode "text=$TEXT" >/dev/null
 ```
 
 ---
